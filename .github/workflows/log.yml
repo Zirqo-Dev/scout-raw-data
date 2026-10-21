@@ -1,0 +1,49 @@
+name: log
+# The schedule lives outside GitHub: cron-job.org calls workflow_dispatch
+# hourly. Do not add a GitHub `schedule:` here as well. hoodscout-data found
+# GitHub's scheduler dropped most fires, and two schedulers landing inside one
+# run's duration produce colliding commits (collect.yml's header, run #1360).
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: log
+  cancel-in-progress: false
+
+jobs:
+  log:
+    # Pinned, not latest, as in hoodscout-data: an unattended pipeline should
+    # not change base image on GitHub's schedule.
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # main's tip at job start, not the SHA the run was created on, so a
+          # run queued behind another does not start from a stale commit.
+          ref: main
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Log Base pools
+        run: python scripts/log_base.py
+      - name: Commit
+        # Also after a red log step: when every call fails the script still
+        # writes the meta file, and that record of the failure is kept. The
+        # job stays red either way.
+        if: ${{ !cancelled() }}
+        run: |
+          git config user.name "hoodscout-bot"
+          git config user.email "actions@github.com"
+          git add data/base
+          git diff --staged --quiet && exit 0
+          git commit -m "data: base $(date -u +%Y-%m-%dT%H:%MZ)"
+          for i in 1 2 3 4 5; do
+            git push && exit 0
+            echo "push rejected, rebasing (attempt $i)"
+            git pull --rebase --autostash
+            sleep 5
+          done
+          echo "push failed after 5 attempts"; exit 1

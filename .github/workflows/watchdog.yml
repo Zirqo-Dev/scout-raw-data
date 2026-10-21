@@ -1,0 +1,95 @@
+name: watchdog
+# Uses GitHub's own `schedule:` on purpose. log.yml is started by
+# cron-job.org, and a watchdog started the same way would die with the thing
+# it watches. GitHub drops scheduled runs often, so this is a slow backstop,
+# not a precise alarm: a stall lasts until someone fixes it, so the alert
+# still fires on whichever hour GitHub does deliver.
+on:
+  schedule:
+    # :41, off the hour.
+    - cron: "41 * * * *"
+  workflow_dispatch:
+    inputs:
+      max_age_minutes:
+        description: >-
+          Override the 3-hour staleness threshold, in minutes, to prove the
+          alert path end to end. Leave empty for the real threshold. 0 forces
+          the alert. Ignored on scheduled runs, which pass nothing.
+        required: false
+        default: ""
+
+# Reads timestamps off disk, writes one issue. Never commits, no secrets.
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: watchdog
+  cancel-in-progress: false
+
+jobs:
+  watchdog:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # main's tip at job start: a stale checkout would report a stall
+          # that was already fixed.
+          ref: main
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Check freshness
+        # Writes STALE.txt only when the log is stale and removes it when it
+        # is not. Exits 0 either way, except 2 for a malformed input. The
+        # input goes through env, never interpolated into the script.
+        env:
+          MAX_AGE: ${{ inputs.max_age_minutes }}
+        run: python scripts/watchdog.py --out STALE.txt --max-age-minutes "$MAX_AGE"
+
+      - name: Open or update the alert
+        if: hashFiles('STALE.txt') != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title="scout-raw alert: base log stale"
+          body=$(cat STALE.txt)
+          gh label create pipeline --color d73a4a --force
+
+          mapfile -t issues < <(gh issue list --state open --search "\"$title\" in:title" \
+            --json number,title --jq "[.[] | select(.title == \"$title\") | .number] | sort | .[]")
+
+          if [ -n "${issues[0]:-}" ]; then
+            keep="${issues[0]}"
+            # Only write when the problem lines differ: a long stall would
+            # otherwise rewrite the body every hour.
+            current=$(gh issue view "$keep" --json body --jq .body | grep '^- ' || true)
+            incoming=$(grep '^- ' STALE.txt || true)
+            if [ "$current" = "$incoming" ]; then
+              echo "#$keep already reports the same problem, skipping edit"
+            else
+              gh issue edit "$keep" --body "$body"
+            fi
+            for extra in "${issues[@]:1}"; do
+              gh issue close "$extra" --comment "Duplicate of #$keep, closing."
+            done
+          else
+            gh issue create --title "$title" --body "$body" --label pipeline
+          fi
+
+      - name: Close the alert if the log is fresh again
+        if: hashFiles('STALE.txt') == ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title="scout-raw alert: base log stale"
+          mapfile -t issues < <(gh issue list --state open --search "\"$title\" in:title" \
+            --json number,title --jq "[.[] | select(.title == \"$title\") | .number] | sort | .[]")
+          if [ -z "${issues[0]:-}" ]; then
+            echo "no open alert, nothing to close"
+            exit 0
+          fi
+          for n in "${issues[@]}"; do
+            gh issue close "$n" --comment \
+              "The Base log is fresh again as of $(date -u +%Y-%m-%dT%H:%MZ). Closed by the watchdog."
+          done
