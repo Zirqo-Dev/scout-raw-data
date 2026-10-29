@@ -1,6 +1,6 @@
 name: log
 # The schedule lives outside GitHub: cron-job.org calls workflow_dispatch
-# hourly. Do not add a GitHub `schedule:` here as well. hoodscout-data found
+# hourly. Do not add a GitHub `schedule:` here as well. A sibling project found
 # GitHub's scheduler dropped most fires, and two schedulers landing inside one
 # run's duration produce colliding commits (collect.yml's header, run #1360).
 on:
@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   log:
-    # Pinned, not latest, as in hoodscout-data: an unattended pipeline should
+    # Pinned, not latest, as elsewhere: an unattended pipeline should
     # not change base image on GitHub's schedule.
     runs-on: ubuntu-24.04
     steps:

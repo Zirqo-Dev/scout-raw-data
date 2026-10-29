@@ -32,13 +32,13 @@ BASE = "https://api.geckoterminal.com/api/v2"
 HEADERS = {"Accept": "application/json;version=20230302",
            "User-Agent": "scout-raw-data/0.1"}
 INCLUDE = "base_token,quote_token,dex"
-SPACING_S = 2.5          # between calls, as in hoodscout-data's collect.py
+SPACING_S = 2.5          # between calls, as in a sibling project's collector
 OUT_DIR = "data/base"
 
 # The universe. Changing it changes what every later file means, so it moves
-# only with Pete's approval and a dated line in docs/CHANGES.md.
+# only with the owner's approval and a dated line in docs/CHANGES.md.
 #
-# UNVERIFIED: sort=h24_volume_usd_desc on /pools. hoodscout-data never calls
+# UNVERIFIED: sort=h24_volume_usd_desc on /pools. A sibling project never calls
 # /pools, and neither the API nor its docs were reachable from the authoring
 # environment. If the value is rejected, the meta file's errors will show a
 # 4xx for those five calls on the first run.

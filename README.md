@@ -53,10 +53,9 @@ so a GeckoTerminal outage alerts after three hours too.
 
 ## Why a separate repo
 
-This repo is separate from
-[hoodscout-data](https://github.com/Zirqo-Dev/hoodscout-data) on purpose. It
+This repo is separate from other projects on purpose. It
 holds raw exploratory data only, and nothing here is evidence for any
-hypothesis registered there. A future HoodScout dashboard tab may read
+hypothesis registered elsewhere. A future dashboard tab may read
 `data/base/latest.json`.
 
 ## Tests

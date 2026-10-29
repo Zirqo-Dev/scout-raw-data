@@ -1,7 +1,7 @@
 # Changes
 
 Dated record of changes to what this repo logs. The universe changes only with
-Pete's approval and a line here.
+the owner's approval and a line here.
 
 - 2026-10-21: Initial universe for network `base`: trending_pools pages 1-5,
   pools pages 1-5 with sort=h24_volume_usd_desc, new_pools pages 1-2, all with

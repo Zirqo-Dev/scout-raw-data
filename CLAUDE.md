@@ -3,10 +3,11 @@
 This repo is PUBLIC. Everything in it, including data/, is world-readable.
 
 ## Roles
-- Pete decides. Claude chat reviews and writes prompts. You are the only writer.
+- The owner decides. Claude chat reviews and writes prompts. You are the only writer.
+- Never write the owner's name, handles, emails or wallets into this repo; say 'the owner'.
 
 ## Git rules
-- HOLD BEFORE COMMIT: show diff stat and test results, then wait for Pete's explicit "commit".
+- HOLD BEFORE COMMIT: show diff stat and test results, then wait for the owner's explicit "commit".
 - Commit to main only. Never push other branches or tags. On a 403, report the exact error and stop. Do not look for a workaround.
 - log.yml pushes to main about every hour. Pull with rebase before working. Never commit files under data/ by hand.
 - A pull with --autostash unstages staged work. Re-stage and re-verify the content before committing.
@@ -20,11 +21,11 @@ This repo is PUBLIC. Everything in it, including data/, is world-readable.
 - This repo logs what GeckoTerminal returns and nothing else. No scoring, tiers, filters, derived fields, holders, dashboard or hypotheses. Dedupe by pool address is the only processing.
 - No trading advice anywhere (code, docs, reports).
 - Contract address, not ticker. Never invent or guess an address. Mark anything unverified as UNVERIFIED. Test fixtures use synthetic addresses only.
-- UNIVERSE in scripts/log_base.py changes only with Pete's approval and a dated line in docs/CHANGES.md. Every meta file records the universe it ran with.
-- Data collected here is exploratory. It is never evidence for a hypothesis registered later, in this repo or in hoodscout-data.
+- UNIVERSE in scripts/log_base.py changes only with the owner's approval and a dated line in docs/CHANGES.md. Every meta file records the universe it ran with.
+- Data collected here is exploratory. It is never evidence for a hypothesis registered later, in this repo or in any other repo.
 
 ## Workflows
-- log.yml is started by cron-job.org via workflow_dispatch, hourly. Do not add a GitHub schedule to it without Pete's approval.
+- log.yml is started by cron-job.org via workflow_dispatch, hourly. Do not add a GitHub schedule to it without the owner's approval.
 - watchdog.yml carries the only GitHub schedule ("41 * * * *"), deliberately: a slow backstop that shares nothing with cron-job.org.
 - The watchdog counts a run as fresh only if its meta file has pools_written > 0.
 - Keep permissions minimal per workflow. Pass workflow inputs through env, never interpolate ${{ }} into run: blocks.
@@ -34,7 +35,7 @@ This repo is PUBLIC. Everything in it, including data/, is world-readable.
 - test.yml is an alarm, not a gate. It runs only on pushes touching scripts/, tests/, requirements-test.txt or itself.
 
 ## Reports
-- 15 lines or fewer unless Pete asks for detail.
-- Lead with the outcome. Then: diff stat, test count, decisions needing Pete, anything unverified.
+- 15 lines or fewer unless the owner asks for detail.
+- Lead with the outcome. Then: diff stat, test count, decisions needing the owner, anything unverified.
 - State what you did NOT verify. Do not repeat the steps you took.
 - Point to a file path for long output instead of pasting it.

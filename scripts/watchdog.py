@@ -11,7 +11,7 @@ A run counts as fresh only if its meta file has pools_written > 0. All-fail
 runs still commit their meta file, but they do not reset the clock, so a
 GeckoTerminal outage alerts after MAX_AGE_S just as a stopped dispatcher does.
 
-Copied from hoodscout-data's scripts/watchdog.py, cut down to one feed.
+Copied from a sibling project's watchdog script, cut down to one feed.
 check_staleness() is pure: a timestamp in, problems out.
 """
 import argparse
