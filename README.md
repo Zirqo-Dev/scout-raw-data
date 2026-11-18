@@ -5,6 +5,8 @@ no scores, tiers, filters, holders, dashboard or hypotheses. Each pool's
 GeckoTerminal attributes are stored verbatim, with the included token objects
 verbatim beside them.
 
+Powered by [CoinGecko](https://www.coingecko.com) · on-chain data from [GeckoTerminal](https://www.geckoterminal.com).
+
 ## Universe
 
 Fixed in `UNIVERSE` in `scripts/log_base.py` and recorded in every meta file.
